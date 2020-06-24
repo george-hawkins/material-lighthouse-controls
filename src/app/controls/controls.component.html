@@ -1,1 +1,26 @@
-<p>controls works!</p>
+<h1>Lighthouse controls</h1>
+<p>
+    <span
+        [cpToggle]="true"
+        [cpWidth]="width - 2"
+        [cpDialogDisplay]="'inline'"
+        [cpAlphaChannel]="'disabled'"
+        [cpDisableInput]="true"
+        (colorPickerChange)="onChangeColor($event)"
+        [colorPicker]="'#3f7f7f'"></span>
+        <!--
+            Notes:
+            * #3f7f7f is a color that places you in the center of the hue slider and the saturation/volume panel.
+            * Don't try to override cpWidth via CSS, if you do you'll break slider-positioning as the color-picker
+              will still use the value of cpWidth irrespective of the width established via CSS.
+            * The color-picker ignores changes to cpWidth after the initial value has been set.
+            * The `- 2` for cpWidth is to take into account the 1px thick border - otherwise you get a scrollbar.
+        -->
+    </p>
+<p>
+    <button mat-raised-button (click)="onReverse()">Reverse</button>
+</p>
+<p>
+    <!-- Width is set via styles.css. -->
+    <mat-slider (input)="onSliderChange($event)"></mat-slider>
+</p>
