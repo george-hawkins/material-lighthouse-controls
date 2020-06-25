@@ -5,6 +5,8 @@ import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
 
 import { MatButtonModule } from '@angular/material/button';
 import { MatSliderModule } from '@angular/material/slider';
+import { MatCardModule } from '@angular/material/card';
+import { MatToolbarModule } from '@angular/material/toolbar';
 
 import { ColorPickerModule } from 'ngx-color-picker';
 
@@ -21,6 +23,8 @@ import { ControlsComponent } from './controls/controls.component';
     BrowserAnimationsModule,
     MatButtonModule,
     MatSliderModule,
+    MatCardModule,
+    MatToolbarModule,
     ColorPickerModule
   ],
   providers: [],

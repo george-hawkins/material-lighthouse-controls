@@ -2,3 +2,9 @@
 
 html, body { height: 100%; }
 body { margin: 0; font-family: Roboto, "Helvetica Neue", sans-serif; }
+
+/* For reasons that seem to involve a topic called CSS shadow piercing this can't just go into controls.component.css. */
+app-controls .color-picker {
+    /* Rather than remove the border, we make it white - in order to avoid affecting size assumptions in color-picker logic. */
+    border-color: #ffffff !important;
+}

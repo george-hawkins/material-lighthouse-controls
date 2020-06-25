@@ -1,3 +1,15 @@
 mat-slider {
     width: 100%;
 }
+
+.controls-content {
+    padding: 30px 30px 0px 30px;
+}
+
+.mat-card {
+    margin-bottom: 8px;
+}
+
+h2 {
+    margin-bottom: 0px;
+}
