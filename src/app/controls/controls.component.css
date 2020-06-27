@@ -13,3 +13,8 @@ mat-slider {
 h2 {
     margin-bottom: 0px;
 }
+
+#icon {
+    margin-left: 14px;
+    margin-right: 8px;
+}
