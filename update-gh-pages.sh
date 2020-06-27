@@ -1,5 +1,5 @@
 rm -rf dist
-ng build --prod --base-href /material-lighthouse-controls/
+ng build --prod --base-href https://george-hawkins.github.io/material-lighthouse-controls/
 git checkout gh-pages
 git reset --hard HEAD~1
 cp -r dist/lighthouse-controls/* .
