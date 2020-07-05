@@ -20,7 +20,7 @@ export class DataService {
 
   connect(): void {
     if (this.socket$ && !this.socket$.closed) {
-      return
+      return;
     }
 
     this.socket$ = this.getNewWebSocket();
@@ -58,7 +58,7 @@ export class DataService {
   }
 
   private getNewWebSocket(): WebSocketSubject<any> {
-    const endpoint = `ws://${location.origin}/socket`
+    const endpoint = `ws://${location.origin}/socket`;
 
     console.log(`attempting to connect to ${endpoint}`);
 
