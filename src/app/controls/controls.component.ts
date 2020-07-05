@@ -21,18 +21,18 @@ export class ControlsComponent implements OnInit {
       ?.map(x => parseInt(x, 16))
       .join(' ');
 
-    this.dataService.sendMessage(`c ${rgb}\n`);
+    this.dataService.sendMessage(`c ${rgb}`);
   }
 
   onReverse(): void {
     console.log('Reverse');
 
-    this.dataService.sendMessage('r\n');
+    this.dataService.sendMessage('r');
   }
 
   onSliderChange(event: MatSliderChange): void {
     console.log(event.value);
 
-    this.dataService.sendMessage(`s ${event.value}\n`);
+    this.dataService.sendMessage(`s ${event.value}`);
   }
 }
