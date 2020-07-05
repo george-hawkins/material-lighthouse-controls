@@ -1,22 +1,16 @@
 import { Injectable } from '@angular/core';
 import { webSocket, WebSocketSubject } from 'rxjs/webSocket';
-import { Observable, timer, Subject, EMPTY } from 'rxjs';
-import { retryWhen, tap, delayWhen, switchAll, catchError } from 'rxjs/operators';
+//import { Observable, timer, Subject, EMPTY } from 'rxjs';
+//import { retryWhen, tap, delayWhen, switchAll, catchError } from 'rxjs/operators';
 
-const RECONNECT_INTERVAL_MS = 2000;
+//const RECONNECT_INTERVAL_MS = 2000;
 
 
-// Code derived from https://javascript-conference.com/blog/real-time-in-angular-a-journey-into-websocket-and-rxjs/
 @Injectable({
   providedIn: 'root'
 })
 export class DataService {
   private socket$: WebSocketSubject<any>;
-  private messagesSubject$ = new Subject();
-  messages$ = this.messagesSubject$.pipe(
-    switchAll(),
-    catchError(e => { throw e; })
-  );
 
   connect(): void {
     if (this.socket$ && !this.socket$.closed) {
@@ -25,26 +19,30 @@ export class DataService {
 
     this.socket$ = this.getNewWebSocket();
 
-    const messages = this.socket$.pipe(
-      this.reconnect,
-      tap({
-        error: error => console.log(error),
-      }),
-      catchError(_ => EMPTY)
-    );
+    // TODO: see https://rxjs-dev.firebaseapp.com/api/webSocket/webSocket
+    // https://stackoverflow.com/a/23176223/245602
+    this.socket$.subscribe();
 
-    // TODO: only next an observable if a new subscription was made. Double-check this.
-    this.messagesSubject$.next(messages);
+    // const messages = this.socket$.pipe(
+    //   this.reconnect,
+    //   tap({
+    //     error: error => console.log(error),
+    //   }),
+    //   catchError(e => { 
+    //     console.log(e);
+    //     return EMPTY
+    //   })
+    // );
   }
 
-  private reconnect(o: Observable<any>): Observable<any> {
-    return o.pipe(
-      retryWhen(errors => errors.pipe(
-        tap(val => console.log('[Data Service] Try to reconnect', val)),
-        delayWhen(_ => timer(RECONNECT_INTERVAL_MS))
-      ))
-    );
-  }
+  // private reconnect(o: Observable<any>): Observable<any> {
+  //   return o.pipe(
+  //     retryWhen(errors => errors.pipe(
+  //       tap(val => console.log('[Data Service] Try to reconnect', val)),
+  //       delayWhen(_ => timer(RECONNECT_INTERVAL_MS))
+  //     ))
+  //   );
+  // }
 
   close() {
     this.socket$.complete();
@@ -58,7 +56,7 @@ export class DataService {
   }
 
   private getNewWebSocket(): WebSocketSubject<any> {
-    const endpoint = `ws://${location.origin}/socket`;
+    const endpoint = `ws://${location.host}/socket`;
 
     console.log(`attempting to connect to ${endpoint}`);
 
@@ -73,7 +71,7 @@ export class DataService {
         next: () => {
           console.log('[DataService]: connection closed');
           this.socket$ = undefined;
-          this.connect();
+          // this.connect();
         }
       },
     });
