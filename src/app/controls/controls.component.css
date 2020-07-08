@@ -18,3 +18,9 @@ h2 {
     margin-left: 14px;
     margin-right: 8px;
 }
+
+/* https://stackoverflow.com/a/42981450/245602 */
+.fill-space {
+    /* Fill the remaining space on a line. */
+    flex: 1 1 auto;
+}

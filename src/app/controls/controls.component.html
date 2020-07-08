@@ -1,6 +1,8 @@
 <mat-toolbar color="primary" class="mat-elevation-z1">
     <mat-icon svgIcon="lighthouse" id="icon"></mat-icon>
     Lighthouse
+    <span class="fill-space"></span>
+    <mat-slide-toggle [checked]="powered" (change)="onPower()"></mat-slide-toggle>
 </mat-toolbar>
 <div class="controls-content">
     <mat-card>

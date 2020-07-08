@@ -8,6 +8,8 @@ import { DataService } from '../data.service';
   styleUrls: ['./controls.component.css']
 })
 export class ControlsComponent implements OnInit {
+  powered = true;
+
   constructor(private dataService: DataService) { }
 
   ngOnInit(): void {
@@ -28,6 +30,11 @@ export class ControlsComponent implements OnInit {
     console.log('Reverse');
 
     this.dataService.sendMessage('r');
+  }
+
+  onPower(): void {
+    this.powered = !this.powered;
+    console.log('Powered', this.powered);
   }
 
   onSliderChange(event: MatSliderChange): void {

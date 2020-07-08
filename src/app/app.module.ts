@@ -11,6 +11,7 @@ import { MatSliderModule } from '@angular/material/slider';
 import { MatCardModule } from '@angular/material/card';
 import { MatToolbarModule } from '@angular/material/toolbar';
 import { MatIconModule } from '@angular/material/icon';
+import { MatSlideToggleModule } from '@angular/material/slide-toggle';
 
 import { ColorPickerModule } from 'ngx-color-picker';
 
@@ -35,6 +36,7 @@ import { ControlsComponent } from './controls/controls.component';
     MatCardModule,
     MatToolbarModule,
     MatIconModule,
+    MatSlideToggleModule,
     ColorPickerModule
   ],
   providers: [],
