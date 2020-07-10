@@ -3,8 +3,8 @@ import { MatSliderChange } from '@angular/material/slider';
 import { DataService } from '../data.service';
 import { SpinnerOverlayService } from '../spinner-overlay.service';
 
-// #3f7f7f is a color that places you in the center of the hue slider and the saturation/volume panel.
-const DEFAULT_COLOR = '#3f7f7f';
+// #000101 is almost fully off, i.e. volume is near 0, but is fully saturated and mid-way in the hue range.
+const DEFAULT_COLOR = '#000101';
 
 @Component({
   selector: 'app-controls',
@@ -25,17 +25,25 @@ export class ControlsComponent implements OnInit {
       this.powered = c;
 
       if (c) {
-        this.spinnerService.hide();
-
-        // Tell the device to show the initial color.
-        this.onChangeColor(this.color);
+        this.onConnect();
       } else {
-        this.spinnerService.show();
-
-        this.color = DEFAULT_COLOR;
-        this.speed = 0;
+        this.onDisconnect();
       }
     });
+  }
+
+  private onConnect(): void {
+    this.spinnerService.hide();
+
+    // Tell the device to reflect the current color value.
+    this.onChangeColor(this.color);
+  }
+
+  private onDisconnect(): void {
+    this.spinnerService.show();
+
+    this.color = DEFAULT_COLOR;
+    this.speed = 0;
   }
 
   onChangeColor(event: string): void {
@@ -63,7 +71,9 @@ export class ControlsComponent implements OnInit {
       // Put the device into deepsleep.
       this.dataService.sendMessage('p');
 
-      this.spinnerService.show();
+      // Ideally, the power-down would quickly be spotted as a disconnect and this would
+      // trigger the call to `onDisconnect()` up above. But this doesn't happen in practice.
+      this.onDisconnect();
     }
   }
 
