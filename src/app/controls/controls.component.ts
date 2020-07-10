@@ -35,7 +35,7 @@ export class ControlsComponent implements OnInit {
         this.color = DEFAULT_COLOR;
         this.speed = 0;
       }
-    })
+    });
   }
 
   onChangeColor(event: string): void {

@@ -33,7 +33,7 @@ export class DataService {
     this.wsSubject$.pipe(
       retryWhen(errors =>
         errors.pipe(
-          tap(e => console.log("Error", e)),
+          tap(e => console.log('Error', e)),
           delayWhen(_ =>  timer(RECONNECT_INTERVAL_MS))
         )
       )
@@ -53,7 +53,7 @@ export class DataService {
     // without a disconnect being detected.
     this.connected$.pipe(
       switchMap(c => c ? pings : EMPTY)
-    ).subscribe(_ => this.sendMessage(HEARTBEAT))
+    ).subscribe(_ => this.sendMessage(HEARTBEAT));
   }
 
   sendMessage(msg: string) {
@@ -61,8 +61,9 @@ export class DataService {
   }
 
   private serializer(o: string): string {
-    if (typeof o !== "string")
+    if (typeof o !== 'string') {
       return '';
+    }
 
     return `${STX}${o}${ETX}`;
   }
