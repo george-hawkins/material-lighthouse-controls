@@ -14,16 +14,20 @@ export class SpinnerOverlayService {
     this.overlayRef = overlay.create(this.config(overlay));
   }
 
-  public show() {
+  public show(): void {
     if (!this.overlayRef.hasAttached()) {
       this.overlayRef.attach(this.portal);
     }
   }
 
-  public hide() {
+  public hide(): void {
     if (this.overlayRef.hasAttached()) {
       this.overlayRef.detach();
     }
+  }
+
+  public setEnabled(b: boolean): void {
+    b ? this.show() : this.hide();
   }
 
   private config(overlay: Overlay): OverlayConfig {

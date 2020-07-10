@@ -6,12 +6,15 @@ import { HttpClientModule } from '@angular/common/http';
 import { BrowserModule } from '@angular/platform-browser';
 import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
 
+import { OverlayModule } from '@angular/cdk/overlay';
+
 import { MatButtonModule } from '@angular/material/button';
 import { MatSliderModule } from '@angular/material/slider';
 import { MatCardModule } from '@angular/material/card';
 import { MatToolbarModule } from '@angular/material/toolbar';
 import { MatIconModule } from '@angular/material/icon';
 import { MatSlideToggleModule } from '@angular/material/slide-toggle';
+import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 
 import { ColorPickerModule } from 'ngx-color-picker';
 
@@ -31,12 +34,14 @@ import { ControlsComponent } from './controls/controls.component';
     BrowserModule,
     BrowserAnimationsModule,
     RouterModule.forRoot([]),
+    OverlayModule,
     MatButtonModule,
     MatSliderModule,
     MatCardModule,
     MatToolbarModule,
     MatIconModule,
     MatSlideToggleModule,
+    MatProgressSpinnerModule,
     ColorPickerModule
   ],
   providers: [],

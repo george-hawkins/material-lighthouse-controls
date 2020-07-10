@@ -1,6 +1,7 @@
 import { Component, OnInit } from '@angular/core';
 import { MatSliderChange } from '@angular/material/slider';
 import { DataService } from '../data.service';
+import { SpinnerOverlayService } from '../spinner-overlay.service';
 
 @Component({
   selector: 'app-controls',
@@ -8,11 +9,17 @@ import { DataService } from '../data.service';
   styleUrls: ['./controls.component.css']
 })
 export class ControlsComponent implements OnInit {
-  powered = true;
+  powered = false;
 
-  constructor(private dataService: DataService) { }
+  constructor(private dataService: DataService, private spinnerService: SpinnerOverlayService) { }
 
   ngOnInit(): void {
+    this.spinnerService.setEnabled(true);
+
+    this.dataService.connected$.subscribe(c => {
+      this.powered = c;
+      this.spinnerService.setEnabled(!c);
+    })
   }
 
   onChangeColor(color: string): void {
@@ -35,6 +42,13 @@ export class ControlsComponent implements OnInit {
   onPower(): void {
     this.powered = !this.powered;
     console.log('Powered', this.powered);
+
+    if (!this.powered) {
+      // Put the device into deepsleep.
+      this.dataService.sendMessage('p');
+
+      this.spinnerService.show();
+    }
   }
 
   onSliderChange(event: MatSliderChange): void {

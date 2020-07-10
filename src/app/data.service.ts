@@ -1,26 +1,28 @@
 import { Injectable } from '@angular/core';
 import { webSocket, WebSocketSubject } from 'rxjs/webSocket';
-import { timer } from 'rxjs';
-import { retryWhen, tap, delayWhen } from 'rxjs/operators';
+import { timer, interval, Subject, empty, EMPTY } from 'rxjs';
+import { retryWhen, tap, delayWhen, takeWhile, switchMap, throttleTime } from 'rxjs/operators';
 import { environment } from 'src/environments/environment';
 
 const RECONNECT_INTERVAL_MS = 2000;
+const PING_INTERVAL_MS = 1000;
+const THROTTLE_DURATION_MS = 120; // Lower than this and the remote end will start discarding data.
+
+const HEARTBEAT = '';
 
 const STX = '\x02';
 const ETX = '\x03';
 
 
-// TODO:
-// * look at discarding messages if volume gets too high.
-// * Heartbeat every second to provoke closed connection awareness.
-// * On off power button.
-// * Spinner overlay when not connected.
-
 @Injectable({
   providedIn: 'root'
 })
 export class DataService {
-  private wsSubject$: WebSocketSubject<any>;
+  private connected = new Subject<boolean>();
+  private throttler = new Subject<string>();
+  private wsSubject$: WebSocketSubject<string>;
+
+  connected$ = this.connected.asObservable();
 
   connect(): void {
     // In older examples, people work directly with a WebSocket and handling reconnects
@@ -32,38 +34,54 @@ export class DataService {
       retryWhen(errors =>
         errors.pipe(
           tap(e => console.log("Error", e)),
-          delayWhen(_ => timer(RECONNECT_INTERVAL_MS))
+          delayWhen(_ =>  timer(RECONNECT_INTERVAL_MS))
         )
       )
     ).subscribe();
+
+    // Limit the volume of messages sent to the remote end.
+    this.throttler.pipe(
+      throttleTime(THROTTLE_DURATION_MS)
+    ).subscribe(s => this.wsSubject$.next(s));
+
+    const pings = interval(PING_INTERVAL_MS);
+
+    // Send heartbeats while connected in an attempt to trigger faster disconnect detection.
+    // In practice sending can continue long after the remote device is e.g. powered off
+    // without a disconnect being detected.
+    this.connected$.pipe(
+      switchMap(c => c ? pings : EMPTY)
+    ).subscribe(_ => this.sendMessage(HEARTBEAT))
   }
 
-  sendMessage(msg: any) {
-    this.wsSubject$.next(msg);
+  sendMessage(msg: string) {
+    this.throttler.next(msg);
   }
 
-  private serializer(o: any): string {
+  private serializer(o: string): string {
     if (typeof o !== "string")
       return '';
 
     return `${STX}${o}${ETX}`;
   }
 
-  private createWsSubject(): WebSocketSubject<any> {
+  private createWsSubject(): WebSocketSubject<string> {
     // Amazingly, neither Typescript nor Javascript have some kind of String.format function.
     const endpoint = environment.wsEndpoint.replace('{}', location.host);
 
-    return webSocket({
+    return webSocket<string>({
       url: endpoint,
       serializer: this.serializer,
       openObserver: {
         next: () => {
-          console.log('[DataService]: connection ok');
+          this.connected.next(true);
+          console.log('websocket opened');
         }
       },
       closeObserver: {
         next: () => {
-          console.log('[DataService]: connection closed');
+          this.connected.next(false);
+          console.log('websocket closed');
         }
       },
     });
