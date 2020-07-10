@@ -1,7 +1,7 @@
 import { Injectable } from '@angular/core';
 import { webSocket, WebSocketSubject } from 'rxjs/webSocket';
-import { timer, interval, Subject, empty, EMPTY } from 'rxjs';
-import { retryWhen, tap, delayWhen, takeWhile, switchMap, throttleTime } from 'rxjs/operators';
+import { timer, interval, Subject, EMPTY } from 'rxjs';
+import { retryWhen, tap, delayWhen, switchMap, sampleTime } from 'rxjs/operators';
 import { environment } from 'src/environments/environment';
 
 const RECONNECT_INTERVAL_MS = 2000;
@@ -40,8 +40,10 @@ export class DataService {
     ).subscribe();
 
     // Limit the volume of messages sent to the remote end.
+    // Note: initially I used `throttleTime` but this means you often lose the most recent
+    // value (which can be important, e.g. if dragging speed down to 0 and lose the 0 value).
     this.throttler.pipe(
-      throttleTime(THROTTLE_DURATION_MS)
+      sampleTime(THROTTLE_DURATION_MS)
     ).subscribe(s => this.wsSubject$.next(s));
 
     const pings = interval(PING_INTERVAL_MS);

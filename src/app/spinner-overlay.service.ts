@@ -26,10 +26,6 @@ export class SpinnerOverlayService {
     }
   }
 
-  public setEnabled(b: boolean): void {
-    b ? this.show() : this.hide();
-  }
-
   private config(overlay: Overlay): OverlayConfig {
     // Note: scrollStrategies.block() only works if the backdrop is already scollable.
     // See https://github.com/angular/components/issues/19020

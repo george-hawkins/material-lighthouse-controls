@@ -2,7 +2,7 @@
     <mat-icon svgIcon="lighthouse" id="icon"></mat-icon>
     Lighthouse
     <span class="fill-space"></span>
-    <mat-slide-toggle [checked]="powered" (change)="onPower()"></mat-slide-toggle>
+    <mat-slide-toggle [(ngModel)]="powered" (change)="onPower()"></mat-slide-toggle>
 </mat-toolbar>
 <div class="controls-content">
     <mat-card>
@@ -14,10 +14,9 @@
             [cpAlphaChannel]="'disabled'"
             [cpDisableInput]="true"
             (colorPickerChange)="onChangeColor($event)"
-            [colorPicker]="'#3f7f7f'"></span>
+            [(colorPicker)]="color"></span>
         <!--
             Notes:
-            * #3f7f7f is a color that places you in the center of the hue slider and the saturation/volume panel.
             * Don't try to override cpWidth via CSS, if you do you'll break slider-positioning as the color-picker
                 will still use the value of cpWidth irrespective of the width established via CSS.
             * The color-picker ignores changes to cpWidth after the initial value has been set.
@@ -28,7 +27,7 @@
         <mat-card-content>
             <h2>Speed</h2>
             <!-- Width is set via styles.css. -->
-            <mat-slider (input)="onSliderChange($event)"></mat-slider>
+            <mat-slider [(ngModel)]="speed" (input)="onSliderChange($event)"></mat-slider>
         </mat-card-content>
     </mat-card>
     <div>

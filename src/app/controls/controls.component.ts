@@ -3,29 +3,46 @@ import { MatSliderChange } from '@angular/material/slider';
 import { DataService } from '../data.service';
 import { SpinnerOverlayService } from '../spinner-overlay.service';
 
+// #3f7f7f is a color that places you in the center of the hue slider and the saturation/volume panel.
+const DEFAULT_COLOR = '#3f7f7f';
+
 @Component({
   selector: 'app-controls',
   templateUrl: './controls.component.html',
   styleUrls: ['./controls.component.css']
 })
 export class ControlsComponent implements OnInit {
+  speed = 0;
+  color = DEFAULT_COLOR;
   powered = false;
 
   constructor(private dataService: DataService, private spinnerService: SpinnerOverlayService) { }
 
   ngOnInit(): void {
-    this.spinnerService.setEnabled(true);
+    this.spinnerService.show();
 
     this.dataService.connected$.subscribe(c => {
       this.powered = c;
-      this.spinnerService.setEnabled(!c);
+
+      if (c) {
+        this.spinnerService.hide();
+
+        // Tell the device to show the initial color.
+        this.onChangeColor(this.color);
+      } else {
+        this.spinnerService.show();
+
+        this.color = DEFAULT_COLOR;
+        this.speed = 0;
+      }
     })
   }
 
-  onChangeColor(color: string): void {
-    console.log('Color changed:', color);
+  onChangeColor(event: string): void {
+    // Like with `this.speed`, `this.color` is only updated when you stop dragging.
+    console.log('Color changed:', event);
 
-    const rgb = color.substring(1)
+    const rgb = event.substring(1)
       .match(/.{2}/g)
       ?.map(x => parseInt(x, 16))
       .join(' ');
@@ -40,7 +57,6 @@ export class ControlsComponent implements OnInit {
   }
 
   onPower(): void {
-    this.powered = !this.powered;
     console.log('Powered', this.powered);
 
     if (!this.powered) {
@@ -52,6 +68,7 @@ export class ControlsComponent implements OnInit {
   }
 
   onSliderChange(event: MatSliderChange): void {
+    // Note: `this.speed` is only updated when you stop dragging.
     console.log(event.value);
 
     this.dataService.sendMessage(`s ${event.value}`);
