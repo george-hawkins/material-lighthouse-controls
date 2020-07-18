@@ -1,8 +1,9 @@
 import { Injectable } from '@angular/core';
 import { webSocket, WebSocketSubject } from 'rxjs/webSocket';
 import { timer, interval, Subject, EMPTY } from 'rxjs';
-import { retryWhen, tap, delayWhen, switchMap, sampleTime } from 'rxjs/operators';
+import { retryWhen, tap, delayWhen, switchMap } from 'rxjs/operators';
 import { environment } from 'src/environments/environment';
+import { sampleTimeWithDefault } from './sampleTimeWithDefault';
 
 const RECONNECT_INTERVAL_MS = 2000;
 const PING_INTERVAL_MS = 1000;
@@ -43,7 +44,7 @@ export class DataService {
     // Note: initially I used `throttleTime` but this means you often lose the most recent
     // value (which can be important, e.g. if dragging speed down to 0 and lose the 0 value).
     this.throttler.pipe(
-      sampleTime(THROTTLE_DURATION_MS)
+      sampleTimeWithDefault(THROTTLE_DURATION_MS)
     ).subscribe(s => this.wsSubject$.next(s));
 
     const pings = interval(PING_INTERVAL_MS);
