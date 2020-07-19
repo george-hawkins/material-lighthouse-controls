@@ -1,7 +1,7 @@
 import { Injectable } from '@angular/core';
 import { webSocket, WebSocketSubject } from 'rxjs/webSocket';
-import { timer, interval, Subject, EMPTY } from 'rxjs';
-import { retryWhen, tap, delayWhen, switchMap } from 'rxjs/operators';
+import { timer, Subject } from 'rxjs';
+import { retryWhen, tap, delayWhen } from 'rxjs/operators';
 import { environment } from 'src/environments/environment';
 import { sampleTimeWithDefault } from './sampleTimeWithDefault';
 
@@ -14,6 +14,35 @@ const HEARTBEAT = '';
 const STX = '\x02';
 const ETX = '\x03';
 
+
+class HeartbeatGenerator<T> {
+  private lastCall = 0;
+  private accumulated = 0;
+
+  constructor(private samplePeriod: number, private heartbeatInterval: number, private heartbeat: () => T) { }
+
+  generate(): T | undefined {
+    const now = Date.now();
+    const diff = now - this.lastCall;
+
+    this.lastCall = now;
+
+    // If `diff` is greater than `samplePeriod` (with an added tolerance of 50%), it's assumed a real
+    // sample value has been emitted since the last call to this method, so reset `accumulated`.
+    if (diff > (this.samplePeriod * 1.5)) {
+      this.accumulated = this.samplePeriod;
+    } else {
+      this.accumulated += this.samplePeriod;
+
+      if (this.accumulated >= this.heartbeatInterval) {
+        this.accumulated = 0;
+        return this.heartbeat();
+      }
+    }
+
+    return undefined;
+  }
+}
 
 @Injectable({
   providedIn: 'root'
@@ -40,21 +69,20 @@ export class DataService {
       )
     ).subscribe();
 
+    const heartbeatGenerator = new HeartbeatGenerator<string>(
+      THROTTLE_DURATION_MS,
+      PING_INTERVAL_MS,
+      () => HEARTBEAT);
+
     // Limit the volume of messages sent to the remote end.
     // Note: initially I used `throttleTime` but this means you often lose the most recent
     // value (which can be important, e.g. if dragging speed down to 0 and lose the 0 value).
+    // And initially I generated heartbeats via an independent proccess but this meant the
+    // heartbeat was often the last message in a sample period and knocked out obvious events
+    // like power-off or reverse.
     this.throttler.pipe(
-      sampleTimeWithDefault(THROTTLE_DURATION_MS)
+      sampleTimeWithDefault(THROTTLE_DURATION_MS, () => heartbeatGenerator.generate())
     ).subscribe(s => this.wsSubject$.next(s));
-
-    const pings = interval(PING_INTERVAL_MS);
-
-    // Send heartbeats while connected in an attempt to trigger faster disconnect detection.
-    // In practice sending can continue long after the remote device is e.g. powered off
-    // without a disconnect being detected.
-    this.connected$.pipe(
-      switchMap(c => c ? pings : EMPTY)
-    ).subscribe(_ => this.sendMessage(HEARTBEAT));
   }
 
   sendMessage(msg: string) {
@@ -62,10 +90,6 @@ export class DataService {
   }
 
   private serializer(o: string): string {
-    if (typeof o !== 'string') {
-      return '';
-    }
-
     return `${STX}${o}${ETX}`;
   }
 
