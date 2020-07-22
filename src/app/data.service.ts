@@ -15,6 +15,9 @@ const STX = '\x02';
 const ETX = '\x03';
 
 
+// Send heartbeats in an _attempt_ to trigger faster disconnect detection.
+// However, in practice sending can continue long after the remote device
+// is e.g. powered off without a disconnect being detected at this level.
 class HeartbeatGenerator<T> {
   private lastCall = 0;
   private accumulated = 0;
@@ -78,8 +81,8 @@ export class DataService {
     // Note: initially I used `throttleTime` but this means you often lose the most recent
     // value (which can be important, e.g. if dragging speed down to 0 and lose the 0 value).
     // And initially I generated heartbeats via an independent proccess but this meant the
-    // heartbeat was often the last message in a sample period and knocked out obvious events
-    // like power-off or reverse.
+    // heartbeat was often the last message in a sample period and ended up knocking out more
+    // important events like power-off or reverse.
     this.throttler.pipe(
       sampleTimeWithDefault(THROTTLE_DURATION_MS, () => heartbeatGenerator.generate())
     ).subscribe(s => this.wsSubject$.next(s));
